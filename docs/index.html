@@ -198,3 +198,179 @@
   </main>
 </body>
 </html>
+
+<section id="bai2" style="padding:30px 0;line-height:1.7">
+  <h1>BÀI 2. ẢO HÓA, CONTAINER VÀ MÔ PHỎNG TRUNG TÂM DỮ LIỆU</h1>
+  <p>
+    <strong>Sinh viên:</strong> Nguyễn Lương Tuấn Anh<br>
+    <strong>MSSV:</strong> 2324802010164<br>
+    <strong>GitHub:</strong> TAnhhcuti
+  </p>
+
+  <h2>I. PHẦN A – CONTAINER</h2>
+
+  <h3>1. Đóng gói API bằng Docker</h3>
+  <p>
+    API Hello Cloud từ Bài 1 được đóng gói bằng Dockerfile,
+    sử dụng image nền node:22-alpine, cài đặt các thư viện
+    cần thiết và chạy ứng dụng trên cổng 3000.
+  </p>
+
+  <h3>2. Chạy hai container</h3>
+  <p>
+    Hai container notes1 và notes2 được tạo từ cùng một image.
+    notes2 được giới hạn 0,5 CPU và 128 MiB RAM.
+  </p>
+
+  <table border="1" cellpadding="9" cellspacing="0"
+         style="border-collapse:collapse;width:100%">
+    <tr>
+      <th>Thông số</th>
+      <th>notes1</th>
+      <th>notes2</th>
+    </tr>
+    <tr><td>CPU sử dụng khi đo</td><td>0,01%</td><td>0,00%</td></tr>
+    <tr><td>RAM sử dụng</td><td>55,05 MiB</td><td>12,85 MiB</td></tr>
+    <tr><td>Giới hạn RAM</td><td>7,756 GiB</td><td>128 MiB</td></tr>
+    <tr><td>CPU API báo cáo</td><td>2</td><td>2</td></tr>
+    <tr><td>RAM API báo cáo</td><td>7,8 GB</td><td>7,8 GB</td></tr>
+  </table>
+
+  <h3>3. So sánh máy ảo và container</h3>
+  <table border="1" cellpadding="9" cellspacing="0"
+         style="border-collapse:collapse;width:100%">
+    <tr>
+      <th>Tiêu chí</th>
+      <th>Codespace (VM)</th>
+      <th>Container</th>
+    </tr>
+    <tr>
+      <td>Thời gian khởi động</td>
+      <td>Đo trong Bài 1</td>
+      <td>0,486 giây (đo bằng time)</td>
+    </tr>
+    <tr>
+      <td>Kích thước</td>
+      <td>Hạn mức lưu trữ 15 GB-tháng</td>
+      <td>Image chiếm 251 MB disk usage</td>
+    </tr>
+    <tr>
+      <td>Nhân hệ điều hành</td>
+      <td>Nhân Linux của môi trường VM</td>
+      <td>Dùng chung nhân Linux với Docker host</td>
+    </tr>
+    <tr>
+      <td>Mức cô lập</td>
+      <td>Cao, tại mức máy ảo</td>
+      <td>Nhẹ hơn, tại mức tiến trình</td>
+    </tr>
+  </table>
+
+  <p>
+    <strong>Nhận xét:</strong> Codespace và container có cùng
+    phiên bản kernel 6.8.0-1070-azure. Container khởi chạy
+    nhanh và dùng chung nhân hệ điều hành với máy chủ.
+    Hạn mức lưu trữ VM không tương đương kích thước image.
+  </p>
+
+  <h3>4. Phát hành image lên GHCR</h3>
+  <p>
+    Image đã được đẩy lên GitHub Container Registry,
+    chuyển sang Public và kiểm tra kéo về thành công
+    sau khi đăng xuất.
+  </p>
+  <p>
+    <strong>Image:</strong>
+    <code>ghcr.io/tanhhcuti/notes-api:1.0</code>
+  </p>
+  <p>
+    <a href="https://github.com/users/TAnhhcuti/packages/container/package/notes-api"
+       target="_blank">Xem package trên GitHub</a>
+  </p>
+
+  <h2>II. PHẦN B – CLOUDSIM PLUS</h2>
+
+  <h3>1. Kết quả mô phỏng</h3>
+  <table border="1" cellpadding="9" cellspacing="0"
+         style="border-collapse:collapse;width:100%">
+    <tr>
+      <th>Lần</th>
+      <th>Cấu hình</th>
+      <th>Thời gian (giây)</th>
+      <th>Kết quả</th>
+    </tr>
+    <tr>
+      <td>0</td><td>Mặc định</td>
+      <td>20,1</td><td>4/4 thành công</td>
+    </tr>
+    <tr>
+      <td>1</td><td>VMS = 4</td>
+      <td>45,6</td><td>4/4 Cloudlet thành công</td>
+    </tr>
+    <tr>
+      <td>2</td><td>CLOUDLETS = 8</td>
+      <td>40,1*</td><td>4/8 thành công</td>
+    </tr>
+    <tr>
+      <td>3</td><td>CloudletSchedulerSpaceShared</td>
+      <td>20,1</td><td>4/4 thành công</td>
+    </tr>
+  </table>
+
+  <p>
+    * Lần 2 chỉ có 4/8 Cloudlet hoàn thành.
+    Giá trị 40,1 giây là FinishTime lớn nhất của các
+    Cloudlet thành công, không phải thời gian hoàn thành
+    toàn bộ công việc.
+  </p>
+
+  <h3>2. Nhận xét kết quả</h3>
+  <p>
+    Việc tăng số VM khi tài nguyên Host có hạn có thể gây
+    lỗi cấp phát VM và làm tăng thời gian chờ.
+    Khi tăng số Cloudlet, tải công việc và tranh chấp
+    tài nguyên tăng khiến một số Cloudlet không hoàn thành.
+    Ở lần 3, Space-shared cho kết quả tương đương lần 0
+    vì tài nguyên CPU đủ cho các Cloudlet chạy đồng thời.
+  </p>
+
+  <h2>III. CÂU HỎI PHẢN BIỆN</h2>
+
+  <h3>Câu 1. Tại sao notes2 vẫn báo RAM máy chủ?</h3>
+  <p>
+    API sử dụng hàm đọc thông tin bộ nhớ hệ thống nên có
+    thể trả về RAM của máy chủ thay vì giới hạn cgroups.
+    Docker sử dụng cgroups để giới hạn container ở 128 MiB.
+    Ứng dụng Node.js hoặc Java cần nhận biết giới hạn
+    bộ nhớ thực tế để tránh lỗi OOM và cấu hình heap
+    phù hợp.
+  </p>
+
+  <h3>Câu 2. Time-shared và Space-shared khác nhau thế nào?</h3>
+  <p>
+    Time-shared chia sẻ thời gian CPU giữa các Cloudlet.
+    Space-shared cấp phát lõi CPU cho các Cloudlet đủ
+    điều kiện, tác vụ còn lại phải chờ khi thiếu tài nguyên.
+    Nhà cung cấp gói giá rẻ có thể ưu tiên Time-shared
+    để tăng mức sử dụng CPU và giảm chi phí, đồng thời
+    cần kiểm soát tình trạng tranh chấp tài nguyên.
+  </p>
+
+  <h3>Câu 3. Lợi ích và hạn chế của mô phỏng?</h3>
+  <p>
+    CloudSim Plus hỗ trợ đánh giá hiệu suất, thử nghiệm
+    lập lịch, dự đoán mức sử dụng tài nguyên và lựa chọn
+    cấu hình trước khi thuê hạ tầng thực tế.
+    Tuy nhiên, kết quả có thể sai lệch do độ trễ mạng,
+    truy cập ổ đĩa, tải biến động, chi phí ảo hóa và
+    các sự cố phần cứng chưa được mô phỏng đầy đủ.
+  </p>
+
+  <h2>IV. KẾT LUẬN</h2>
+  <p>
+    Bài thực hành giúp phân biệt VM và container,
+    đóng gói và phát hành API bằng Docker/GHCR,
+    đồng thời quan sát ảnh hưởng của số lượng VM,
+    Cloudlet và chính sách lập lịch trong CloudSim Plus.
+  </p>
+</section>
